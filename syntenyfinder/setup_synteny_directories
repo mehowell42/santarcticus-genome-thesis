@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+"""
+setup_synteny_directories.py
+
+The real SyntenyFinder notebook (SyntenyFinder_customisable/Synteny_main.ipynb)
+does its own parsing -- GTF/GFF reading, ID matching, ALG tracing all happen
+inside the notebook itself. All this script does is the boring, error-prone
+part: taking your already-downloaded per-species files and arranging them
+into the exact directory + naming layout the notebook's Synteny() class
+requires, via symlinks (originals are untouched).
+
+Required layout (built under --root):
+    input_data/
+        genomes/<Code>.fna
+        proteomes/<Code>.fasta
+        gene_rows/<Code>.gtf      <- extension is HARDCODED by the notebook,
+                                     even for GFF3 content. Renaming here is
+                                     just the filename; contents are untouched
+                                     and the notebook's gtf_to_dataframe()
+                                     parser handles both GTF and GFF3 syntax.
+
+Manifest: same species_manifest.tsv format as before (species_code,
+species_name, genome_fasta, annotation, protein_fasta, ...). accession and
+n_chromosomes columns are ignored here -- n_chromosomes is supplied directly
+in the notebook's `chromosomes = {...}` dict, since build_karyotype() needs
+it in Python at run time, not as a file.
+
+Usage:
+    python setup_synteny_directories.py --manifest species_manifest.tsv --root ./bryozoans
+"""
+
+import argparse
+import csv
+import os
+import sys
+from pathlib import Path
+
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__,
+                                formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--manifest", required=True)
+    p.add_argument("--root", required=True,
+                   help="This becomes root_directory in the notebook's Settings cell")
+    args = p.parse_args()
+
+    root = Path(args.root)
+    dirs = {
+        "genomes": (root / "input_data" / "genomes", ".fna"),
+        "proteomes": (root / "input_data" / "proteomes", ".fasta"),
+        "gene_rows": (root / "input_data" / "gene_rows", ".gtf"),
+    }
+    for d, _ in dirs.values():
+        d.mkdir(parents=True, exist_ok=True)
+
+    codes = []
+    n_chr = {}
+
+    with open(args.manifest) as fh:
+        for row in csv.DictReader(fh, delimiter="\t"):
+            if not row.get("species_name", "").strip():
+                continue
+            code = row["species_code"].strip()
+            if not code:
+                sys.exit(f"species_code is required for every row (blank for {row.get('species_name')})")
+            codes.append(code)
+
+            for key, (target_dir, ext) in [
+                ("genome_fasta", dirs["genomes"]),
+                ("protein_fasta", dirs["proteomes"]),
+                ("annotation", dirs["gene_rows"]),
+            ]:
+                src = row.get(key, "").strip()
+                if not src or not os.path.exists(src):
+                    sys.exit(f"{code}: missing or unreadable {key}: {src!r}")
+                link = target_dir / f"{code}{ext}"
+                if link.exists() or link.is_symlink():
+                    link.unlink()
+                os.symlink(os.path.abspath(src), link)
+                print(f"  {code}: {key} -> {link}")
+
+            if row.get("n_chromosomes", "").strip():
+                n_chr[code] = int(row["n_chromosomes"])
+
+    print("\nDone. Paste this into the notebook's Settings cell:\n")
+    print(f"root_directory = '{root.resolve()}'")
+    print(f"species_codes = {codes!r}")
+    print("run_name = 'my_run'  # choose a name")
+    print("orthofinder_path = '/path/to/orthofinder'")
+    print("threads = 24  # adjust to your machine")
+    if n_chr:
+        print(f"\n# For the build_karyotype() cell:")
+        print(f"chromosomes = {n_chr!r}")
+        missing = [c for c in codes if c not in n_chr]
+        if missing:
+            print(f"# NOTE: no chromosome count given for {missing} -- fill these "
+                  f"in by inspecting scaffold lengths, or set generously high and "
+                  f"check scaffold names as the notebook suggests.")
+    else:
+        print("\n# n_chromosomes wasn't in your manifest -- you'll need to fill in")
+        print("# the chromosomes = {...} dict by hand in the build_karyotype() cell.")
+
+
+if __name__ == "__main__":
+    main()
