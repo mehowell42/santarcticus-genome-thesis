@@ -1,5 +1,5 @@
 # santarcticus-genome-thesis
-Scripts for both the assembly and comparative work done on Sterechinus antarcticus for the Marine Biology Master's thesis
+Scripts for both the assembly and comparative work done on *Sterechinus antarcticus* for the Marine Biology Master's thesis
 
 This repository contains all the scripts for each stage of the assembly processes as well as comparative analysis.
 
@@ -16,4 +16,6 @@ Repeats: code for running earlgrey library preparation and terrier for classific
 
 Syntenyfinder: all scripts for running SyntenyFinder in python and R scripts used for ALG analysis and pairwise comparisons both with and without inversions
 
-Feel free to reach out with any questions.
+
+
+*Feel free to reach out with any questions.*
