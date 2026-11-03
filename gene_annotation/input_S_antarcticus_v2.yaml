@@ -1,0 +1,7 @@
+genome: santarcticus_hap2_length.fa
+taxid: 875183
+short_reads:
+  - ERR3477154
+  - SRR5658460
+long_reads:
+  - /fast/jd139945/santarcticus/05_egapx/egapx/sa_transcriptome/isoseq_fa/PC00173-A11_FLcDNA.fq
