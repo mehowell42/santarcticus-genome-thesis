@@ -2,20 +2,6 @@
 # Adapted from Isabel Jiah-Yih Liao, Tom Lewin, Yi-Jyun Luo's synteny_v5.5.R
 # Symbiosis Genomics & Evolution Lab 2024
 #
-# CHANGES FROM THE ORIGINAL, minimal set:
-#   1. alg_hexmap replaced with chromosome_hexmap -- your TRACE column holds
-#      arbitrary reference-chromosome letters (A, B, C...) from
-#      trace_chromosomes(), not real Simakov ALG names, so it needs a
-#      different (but same-shaped) lookup table.
-#   2. The "NA" -> "XXXX" relabeling is replaced with dropping untraceable
-#      rows entirely. Your chromosome-trace output doesn't write "NA" for
-#      excluded genes -- it passes through the raw scaffold accession
-#      (e.g. "NW_022145547.1") for any gene that landed outside the
-#      reference species' retained top-N chromosomes. Those rows can't be
-#      colored by this scheme at all, so they're filtered out rather than
-#      force-mapped to a fallback color.
-# Everything else -- loop structure, mixing rate calculations, heatmaps,
-# chromosome-subset plots -- is unchanged from the original.
 
 # Setting the working directory
 setwd("C:/Users/maddi/OneDrive - James Cook University/Thesis/R/syntenyfinder/sterechinus/")
