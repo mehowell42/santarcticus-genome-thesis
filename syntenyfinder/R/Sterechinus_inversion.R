@@ -3,14 +3,6 @@
 # Adapted from Isabel Jiah-Yih Liao, Tom Lewin, Yi-Jyun Luo's synteny_v5.5.R
 # Symbiosis Genomics & Evolution Lab 2024
 #
-# CHANGES FROM YOUR PASTED VERSION (colouring only):
-#   1. Removed the chromosome-letter palette and the "untraceable" filter.
-#      Colour now comes from the inversion classification, so those rows no
-#      longer need to be dropped and every single-copy gene is kept.
-#   2. Added one console line per pair reporting how many genes were called
-#      colinear / inverted / unassessed, so you can sanity-check the colouring.
-# Everything else is unchanged.
-#
 # HOW THE COLOURING WORKS
 #   Gene strand is not kept in SyntenyFinder's output, so inversions are
 #   inferred from gene order, as in an Oxford dot plot. For each chromosome
